@@ -1,17 +1,62 @@
 import sys
-
+import os
+import pandas as pd
+from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    """Load the data files into a single Pandas DataFrame.
+    
+    Args:
+    messages_filepath: string. Full filepath to messages CSV file.
+    categories_filepath: string. Full filepath to categories CSV file.
 
+    Return:
+    df: Pandas DataFrame of merged files
+    """
+
+    # load datasets from files
+    messages = pd.read_csv(messages_filepath)
+    categories = pd.read_csv(categories_filepath)
+
+    # merge datasets
+    df = messages.join(categories.set_index('id'), on = 'id')
+    
+    # create a dataframe of the individual category columns
+    categories = df['categories'].str.split(';', expand = True)
+    # select the first row of the categories dataframe and use for column names
+    row = categories.iloc[0]
+    categories.columns = row.apply(lambda x: x[:-2])
+
+    # convert category values to numbers 0 or 1
+    for column in categories:
+        # set each value to be the last character of the string
+        categories[column] = categories[column].apply(lambda x: x[-1])
+        # convert column from string to numeric
+        categories[column] = categories[column].astype(int)
+
+    # replace categories column in df with new category columns
+    df = df.drop(columns=['categories']).join(categories)
+
+    return df
 
 def clean_data(df):
-    pass
+    """Remove duplicates from DataFrame (df) and return."""
+
+    return df.drop_duplicates()
 
 
-def save_data(df, database_filename):
-    pass  
+def save_data(df, database_filepath):
+    """Save the clean dataset into a sqlite database.
+    
+    Args:
+    df: Pandas DataFrame. DataFrame of dataset.
+    database_filepath: string. File path with name of database to save DataFrame to.
+    """  
+    # get the table name from the database_filepath
+    table_name = os.path.splitext(database_filepath)[0]
 
+    engine = create_engine('sqlite:///'+database_filepath)
+    df.to_sql(table_name, con=engine, index=False, if_exists='replace')
 
 def main():
     if len(sys.argv) == 4:
