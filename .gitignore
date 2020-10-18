@@ -1,1 +1,17 @@
+### exclude database files ###
+*.db
+
+### Flask ###
+instance/
+.webassets-cache
+
+### VSCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+### Conda ###
 default.profraw
