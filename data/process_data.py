@@ -33,6 +33,9 @@ def load_data(messages_filepath, categories_filepath):
         categories[column] = categories[column].apply(lambda x: x[-1])
         # convert column from string to numeric
         categories[column] = categories[column].astype(int)
+    
+    # ensure boolean values, replace values greater than 1 with 1
+    categories[categories > 1] = 1
 
     # replace categories column in df with new category columns
     df = df.drop(columns=['categories']).join(categories)
@@ -40,7 +43,7 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 def clean_data(df):
-    """Remove duplicates from DataFrame (df) and return."""
+    """Remove duplicates from DataFrame and return DataFrame (df)"""
 
     return df.drop_duplicates()
 
