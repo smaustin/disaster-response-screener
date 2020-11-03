@@ -56,7 +56,9 @@ def save_data(df, database_filepath):
     database_filepath: string. File path with name of database to save DataFrame to.
     """  
     # get the table name from the database_filepath
-    table_name = os.path.splitext(database_filepath)[0]
+    file_name = os.path.splitext(database_filepath)[0]
+    table_name = os.path.basename(file_name)
+    print(table_name)
 
     engine = create_engine('sqlite:///'+database_filepath)
     df.to_sql(table_name, con=engine, index=False, if_exists='replace')
