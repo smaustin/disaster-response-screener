@@ -9,18 +9,19 @@ nltk.download(['punkt', 'wordnet'])
 import pandas as pd
 import pickle
 from sqlalchemy import create_engine
-from nltk.tokenize import word_tokenize
+# from nltk.tokenize import word_tokenize
 from nltk.stem.wordnet import WordNetLemmatizer
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-from sklearn.feature_selection import SelectPercentile, mutual_info_classif
+# from sklearn.feature_selection import SelectPercentile, mutual_info_classif
 from sklearn.multioutput import MultiOutputClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.neighbors import KNeighborsClassifier
+# from sklearn.naive_bayes import MultinomialNB
+# from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
 def load_data(database_filepath):
     """Load the database file and return features, target variables and categories.
@@ -103,7 +104,29 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    """Use the model to predict using a test set, then print evaluation results to console.
+    
+    Args:
+    model: obj. Model object created using build_model.
+    X_test: numpy.ndarray. Array of text messages to predict labels
+    Y_test: numpy.ndarray. Array of true labels for X_test
+    category_name: 
+
+    Return:
+    None
+    """
+    # predict on test data
+    Y_pred = model.predict(X_test)
+
+    # loop over the indexes of first row
+    for idx, pred in enumerate(Y_pred[0,:]):
+        
+        # pass each column into metric 
+        accuracy = accuracy_score(Y_test[:, idx], Y_pred[:, idx])
+        precision, recall, f1, support = precision_recall_fscore_support(Y_test[:, idx], Y_pred[:, idx], average='binary', zero_division=0)
+        print(category_names[idx])
+        print(f'    Accuracy: {accuracy:.4f}', f'    Precision: {precision:.4f}', f'    Recall: {recall:.4f}')
+        print()
 
 
 def save_model(model, model_filepath):
@@ -119,7 +142,7 @@ def main():
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         print("Loading Time:", round(time() - t0, 3), "s")
-        # print(Y.shape)
+        # print(type(Y_train))
         # sys.exit()
 
         print('Building model...')
