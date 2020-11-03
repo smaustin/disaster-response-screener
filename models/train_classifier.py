@@ -1,6 +1,7 @@
 import sys
 import os
 from time import time
+from custom_vectorizer import CustomVectorizer
 
 # download necessary NLTK data
 import nltk
@@ -9,12 +10,10 @@ nltk.download(['punkt', 'wordnet'])
 import pandas as pd
 import pickle
 from sqlalchemy import create_engine
-# from nltk.tokenize import word_tokenize
-from nltk.stem.wordnet import WordNetLemmatizer
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_extraction.text import TfidfTransformer
 # from sklearn.feature_selection import SelectPercentile, mutual_info_classif
 from sklearn.multioutput import MultiOutputClassifier
 # from sklearn.naive_bayes import MultinomialNB
@@ -45,41 +44,6 @@ def load_data(database_filepath):
     target_names = df.loc[:, 'related':'direct_report'].columns.values
 
     return (X, Y, target_names)
-
-def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
-
-# Need to lemmatize and use built in tokenizer and case normalizer from CountVectorizer(),
-# Create a custom Class inheriting from CountVectorizer()
-def lemmatize(tokens):
-    """Helper function to lemmatize text during tokenization."""   
-    # initiate lemmatizer
-    lemmatizer = WordNetLemmatizer()
-
-    # iterate through each token
-    clean_tokens = []
-    for tok in tokens:
-        # lemmatize both nouns and verbs so two passes, 
-        clean_tok = lemmatizer.lemmatize(lemmatizer.lemmatize(tok), pos='v')
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
-
-class CustomVectorizer(CountVectorizer):
-    """Custom vectorizer that inherits from CountVectorizer.
-    Allows for lemmatization to happening during CountVectorizer tokenization 
-    and utilizes built-in preprocessing for case etc."""
-    def build_tokenizer(self):
-        tokenize = super().build_tokenizer()
-        return lambda doc: list(lemmatize(tokenize(doc)))
 
 
 def build_model():
@@ -142,8 +106,8 @@ def main():
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         print("Loading Time:", round(time() - t0, 3), "s")
-        # print(type(Y_train))
-        # sys.exit()
+        print(type(Y_train))
+        sys.exit()
 
         print('Building model...')
         t0 = time()
