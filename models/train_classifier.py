@@ -1,9 +1,25 @@
 import sys
 import os
+from time import time
+
+# download necessary NLTK data
+import nltk
+nltk.download(['punkt', 'wordnet'])
 
 import pandas as pd
+import pickle
 from sqlalchemy import create_engine
-from sklearn.model_selection import train_test_split
+from nltk.tokenize import word_tokenize
+from nltk.stem.wordnet import WordNetLemmatizer
+
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_selection import SelectPercentile, mutual_info_classif
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 
 def load_data(database_filepath):
@@ -30,11 +46,60 @@ def load_data(database_filepath):
     return (X, Y, target_names)
 
 def tokenize(text):
-    pass
+    tokens = word_tokenize(text)
+    lemmatizer = WordNetLemmatizer()
+
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
+
+    return clean_tokens
+
+# Need to lemmatize and use built in tokenizer and case normalizer from CountVectorizer(),
+# Create a custom Class inheriting from CountVectorizer()
+def lemmatize(tokens):
+    """Helper function to lemmatize text during tokenization."""   
+    # initiate lemmatizer
+    lemmatizer = WordNetLemmatizer()
+
+    # iterate through each token
+    clean_tokens = []
+    for tok in tokens:
+        # lemmatize both nouns and verbs so two passes, 
+        clean_tok = lemmatizer.lemmatize(lemmatizer.lemmatize(tok), pos='v')
+        clean_tokens.append(clean_tok)
+
+    return clean_tokens
+
+class CustomVectorizer(CountVectorizer):
+    """Custom vectorizer that inherits from CountVectorizer.
+    Allows for lemmatization to happening during CountVectorizer tokenization 
+    and utilizes built-in preprocessing for case etc."""
+    def build_tokenizer(self):
+        tokenize = super().build_tokenizer()
+        return lambda doc: list(lemmatize(tokenize(doc)))
 
 
 def build_model():
-    pass
+    """Build a model to process text."""
+    # classifier must 1) support sparse matrix - returned from TfidfTransformer,
+    # 2) implement predict_proba method - for use with MultiOutputClassifier,
+    # and 3) handle targets with only one binary label (all 0 or 1)
+    pipeline = Pipeline([
+        ('vect', CustomVectorizer()), # text tokenization 
+        ('tfidf', TfidfTransformer()),  # feature normalization
+        ('clf', MultiOutputClassifier(RandomForestClassifier())) # classifier
+    ])
+    # RandomForestClassifier(min_samples_split=2, n_estimators=100)
+    parameters = {
+        'clf__estimator__n_estimators': [50, 100, 200],
+        # 'clf__estimator__min_samples_split': [2, 3, 4]
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters, cv=3, verbose=1, n_jobs=-1)
+
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -42,24 +107,30 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
-    pass
+    pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
+        
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
+        t0 = time()
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-        
-        print(Y.shape)
-        sys.exit()
+        print("Loading Time:", round(time() - t0, 3), "s")
+        # print(Y.shape)
+        # sys.exit()
 
         print('Building model...')
+        t0 = time()
         model = build_model()
-        
+        print("Building time:", round(time() - t0, 3), "s")
+
         print('Training model...')
+        t0 = time()
         model.fit(X_train, Y_train)
+        print("Training time:", round(time() - t0, 3), "s")
         
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
