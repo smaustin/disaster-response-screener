@@ -16,7 +16,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfTransformer
 # from sklearn.feature_selection import SelectPercentile, mutual_info_classif
 from sklearn.multioutput import MultiOutputClassifier
-# from sklearn.naive_bayes import MultinomialNB
+# from sklearn.linear_model import LogisticRegression
 # from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 
@@ -106,8 +106,8 @@ def main():
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         print("Loading Time:", round(time() - t0, 3), "s")
-        print(type(Y_train))
-        sys.exit()
+        # print(type(Y_train))
+        # sys.exit()
 
         print('Building model...')
         t0 = time()
