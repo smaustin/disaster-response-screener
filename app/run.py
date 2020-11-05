@@ -32,13 +32,23 @@ model = joblib.load("../models/classifier.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
+    # genre data
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+
+    # category data
+    df_category = df.loc[:, 'related':'direct_report']
+    category_counts = df_category.sum()
+    category_names = df_category.columns.str.replace('_', ' ')
+
+    # category with genre data
+    df_cat_gen = df.loc[:, 'genre':'direct_report']
+    df_cat_gen_counts = df_cat_gen.groupby('genre').sum()
+
     
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
+        # dist by genre
         {
             'data': [
                 Bar(
@@ -54,6 +64,46 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        # dist by category
+        {
+            'data': [
+                Bar(
+                    x=category_names,
+                    y=category_counts
+                ) 
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
+                }
+            }
+        },
+        # dist by category grouped by genre
+        {
+            'data': [
+                Bar(
+                    x=category_names,
+                    y=row,
+                    name=genre
+                ) for genre, row in df_cat_gen_counts.iterrows()
+            ],
+
+            'layout': {
+                'barmode': 'stack',
+                'title': 'Distribution of Message Categories by Genres',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
                 }
             }
         }
