@@ -7,8 +7,8 @@ def load_data(messages_filepath, categories_filepath):
     """Load the data files into a single Pandas DataFrame.
     
     Args:
-    messages_filepath: string. Full filepath to messages CSV file.
-    categories_filepath: string. Full filepath to categories CSV file.
+    messages_filepath: string. Filepath to messages CSV file.
+    categories_filepath: string. Filepath to categories CSV file.
 
     Return:
     df: Pandas DataFrame of merged files
