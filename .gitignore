@@ -1,5 +1,6 @@
 ### exclude database files ###
-*.db
+# *.db
+# *.pkl
 
 ### Flask ###
 instance/
@@ -15,3 +16,7 @@ instance/
 
 ### Conda ###
 default.profraw
+
+### Python ###
+__pycache__
+*.pyc
