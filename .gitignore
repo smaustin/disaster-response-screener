@@ -1,6 +1,6 @@
 ### exclude database files ###
 # *.db
-# *.pkl
+*.pkl
 
 ### Flask ###
 instance/
