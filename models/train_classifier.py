@@ -25,7 +25,7 @@ def load_data(database_filepath):
     Args:
     database_filepath: string. Full filepath to database db file.
 
-    Return:
+    Returns:
     X: array. features
     Y: array. target variables
     target_names: array of category names
@@ -47,7 +47,7 @@ def build_model():
     """Use Pipeline and GridSearchCV to build a model for message processing 
     using multilabel classification.
     
-    Return:
+    Returns:
     search: object. A grid search object with optimized hyperparameters.
     """
     
@@ -85,7 +85,7 @@ def evaluate_model(model, X_test, Y_test, category_names):
     Y_test: numpy.ndarray. Array of true labels for X_test
     category_name: 
 
-    Return:
+    Returns:
     None
     """
     # predict on test data
@@ -109,7 +109,7 @@ def save_model(model, model_filepath):
     model: object. Trained model object
     model_filepath: string. Filepath to save file.
     
-    Return:
+    Returns:
     None
     """
     pickle.dump(model, open(model_filepath, 'wb'))

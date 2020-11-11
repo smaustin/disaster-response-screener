@@ -10,8 +10,8 @@ def load_data(messages_filepath, categories_filepath):
     messages_filepath: string. Filepath to messages CSV file.
     categories_filepath: string. Filepath to categories CSV file.
 
-    Return:
-    df: Pandas DataFrame of merged files
+    Returns:
+    df: Pandas DataFrame. DataFrame of merged files
     """
 
     # load datasets from files
@@ -43,7 +43,14 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 def clean_data(df):
-    """Remove duplicates from DataFrame and return DataFrame (df)"""
+    """Remove duplicates from DataFrame and return.
+    
+    Args:
+    df: Pandas DataFrame. DataFrame of dataset.
+
+    Returns:
+    df: Pandas DataFrame. DataFrame with duplicates removed.
+    """
 
     return df.drop_duplicates()
 
@@ -53,7 +60,10 @@ def save_data(df, database_filepath):
     
     Args:
     df: Pandas DataFrame. DataFrame of dataset.
-    database_filepath: string. File path with name of database to save DataFrame to.
+    database_filepath: string. File path with name of database to save DataFrame.
+
+    Returns:
+    None
     """  
     # get the table name from the database_filepath
     file_name = os.path.splitext(database_filepath)[0]
