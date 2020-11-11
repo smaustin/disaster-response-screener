@@ -96,9 +96,10 @@ def evaluate_model(model, X_test, Y_test, category_names):
         
         # pass each column into metric 
         accuracy = accuracy_score(Y_test[:, idx], Y_pred[:, idx])
-        precision, recall, f1, support = precision_recall_fscore_support(Y_test[:, idx], Y_pred[:, idx], average='binary', zero_division=0)
+        precision, recall, fscore, support = precision_recall_fscore_support(Y_test[:, idx], Y_pred[:, idx], average='binary', zero_division=0)
         print(category_names[idx])
-        print(f'    Accuracy: {accuracy:.4f}', f'    Precision: {precision:.4f}', f'    Recall: {recall:.4f}')
+        # print(f'    Accuracy: {accuracy:.4f}', f'    Precision: {precision:.4f}', f'    Recall: {recall:.4f}')
+        print(f'\tAccuracy: {accuracy:.4f}', f'\tPrecision: {precision:.4f}', f'\tRecall: {recall:.4f}', f'\tF1 Score: {fscore:.4f}')
         print()
 
 
